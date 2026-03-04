@@ -1,0 +1,86 @@
+services:
+
+  # ---- 1. Config Server (starts first) ----
+  configserver:
+    build: ./configserver
+    container_name: configserver
+    ports:
+      - "8888:8888"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8888/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+
+  # ---- 2. Eureka Server (media) ----
+  media:
+    build: ./media
+    container_name: media
+    ports:
+      - "8761:8761"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ---- 3. User Service ----
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      media:
+        condition: service_healthy
+    environment:
+      # Override localhost references to use Docker service names
+      EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE: http://media:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://configserver:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/userdb
+      SPRING_DATASOURCE_USERNAME: hamza
+      SPRING_DATASOURCE_PASSWORD: "1111"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8081/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+
+  # ---- 4. Gateway (starts last) ----
+  gateaway:
+    build: ./gateaway
+    container_name: gateaway
+    ports:
+      - "7001:7001"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      media:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE: http://media:8761/eureka/
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    driver: bridge
+
