@@ -25,12 +25,10 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: postgres
-    env_file:
-      - .env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: userdb
+      POSTGRES_USER: user1
+      POSTGRES_PASSWORD: "1111"
     ports:
       - "5433:5432"
     volumes:
@@ -44,15 +42,13 @@ services:
     container_name: user-service
     ports:
       - "8081:8081"
-    env_file:
-      - .env
     environment:
       # overide application.proprties
       EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE: http://media:8761/eureka/
       SPRING_CONFIG_IMPORT: optional:configserver:http://configserver:8888
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/userdb
+      SPRING_DATASOURCE_USERNAME: user1
+      SPRING_DATASOURCE_PASSWORD: "1111"
     networks:
       - microservices-net
    

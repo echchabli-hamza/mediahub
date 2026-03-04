@@ -11,6 +11,6 @@ public class UserController {
     public String getUserById(@PathVariable Long id) {
 
 
-        return "user 1" + id ;
+        return "new update" + id ;
     }
 }
