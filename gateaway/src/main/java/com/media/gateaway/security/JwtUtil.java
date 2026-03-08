@@ -1,0 +1,53 @@
+package com.media.gateaway.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+
+@Component
+public class JwtUtil {
+
+    private final SecretKey secretKey;
+
+    public JwtUtil(@Value("${app.jwt.secret}") String secret) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    /**
+     * Returns all claims if the token is valid and not expired.
+     * Throws JwtException if invalid.
+     */
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            extractAllClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
+    public String extractUserId(String token) {
+        Object id = extractAllClaims(token).get("id");
+        return id != null ? id.toString() : null;
+    }
+}
