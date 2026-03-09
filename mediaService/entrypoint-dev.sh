@@ -1,6 +1,6 @@
 #!/bin/bash
 # Dev entrypoint: runs Spring Boot + watches .java files for hot reload
-# When a .java file changes, triggers recompilation → DevTools auto-restarts
+# When a .java file changes, triggers recompilation Ã¢â€ â€™ DevTools auto-restarts
 
 # Start spring-boot:run in the background
 ./mvnw spring-boot:run &
@@ -10,7 +10,7 @@ APP_PID=$!
 sleep 5
 
 echo "================================================"
-echo "  HOT RELOAD ACTIVE — watching src/ for changes"
+echo "  HOT RELOAD ACTIVE Ã¢â‚¬â€ watching src/ for changes"
 echo "================================================"
 
 # Watch for .java file changes and trigger recompilation
@@ -21,7 +21,7 @@ while true; do
     echo ""
     echo ">>> Change detected, recompiling..."
     ./mvnw compile -q 2>/dev/null
-    echo ">>> Recompilation done — DevTools will restart the app"
+    echo ">>> Recompilation done Ã¢â‚¬â€ DevTools will restart the app"
   fi
   touch /tmp/.last_compile
   sleep 3

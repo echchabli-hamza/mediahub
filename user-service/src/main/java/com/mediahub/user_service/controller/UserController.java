@@ -52,4 +52,16 @@ public class UserController {
         }
         return authService.getAllUsers();
     }
+
+    // ── Inter-service endpoints (for Feign clients) ─────────────────────────
+
+    @GetMapping("/users/{id}/exists")
+    public Map<String, Boolean> userExists(@PathVariable Long id) {
+        return Map.of("exists", authService.userExists(id));
+    }
+
+    @GetMapping("/users/{id}/info")
+    public UserDTO getUserInfo(@PathVariable Long id) {
+        return authService.getUserById(id);
+    }
 }
