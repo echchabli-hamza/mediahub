@@ -44,8 +44,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+        // No token present — pass through without injecting headers.
+        // Downstream services decide whether to require authentication.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Missing or malformed Authorization header");
+            filterChain.doFilter(request, response);
             return;
         }
 
