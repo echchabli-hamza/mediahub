@@ -1,0 +1,552 @@
+{
+  "info": {
+    "name": "MEDIAHUB - Streaming Backend Platform",
+    "description": "Complete API collection for MEDIAHUB microservices platform.\n\nBase URL: http://localhost:7001 (via Gateway)\n\nFlow:\n1. Register a user\n2. Login to get JWT token\n3. Use the token in Authorization header for protected requests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:7001",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/auth/register",
+              "host": ["{{gateway_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user. Role defaults to USER."
+          }
+        },
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"adminuser\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/auth/register",
+              "host": ["{{gateway_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('Token saved:', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/auth/login",
+              "host": ["{{gateway_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login and get JWT token. Token is automatically saved to collection variable."
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "Get All Users (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/users",
+              "host": ["{{gateway_url}}"],
+              "path": ["users"]
+            },
+            "description": "Get all users. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/users/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Check User Exists (Inter-service)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/users/1/exists",
+              "host": ["{{gateway_url}}"],
+              "path": ["users", "1", "exists"]
+            }
+          }
+        },
+        {
+          "name": "Get User Info (Inter-service)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/users/1/info",
+              "host": ["{{gateway_url}}"],
+              "path": ["users", "1", "info"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎬 Media",
+      "item": [
+        {
+          "name": "Create Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Breaking Bad\",\n  \"description\": \"A high school chemistry teacher turned drug manufacturer\",\n  \"genre\": \"Crime\",\n  \"category\": \"SERIES\",\n  \"releaseYear\": 2008,\n  \"duration\": 47,\n  \"rating\": 9.5\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/media",
+              "host": ["{{gateway_url}}"],
+              "path": ["media"]
+            },
+            "description": "Create a new media item. Category: MOVIE, SERIES, PODCAST"
+          }
+        },
+        {
+          "name": "Create Movie",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Inception\",\n  \"description\": \"A thief who steals corporate secrets through dream-sharing technology\",\n  \"genre\": \"Sci-Fi\",\n  \"category\": \"MOVIE\",\n  \"releaseYear\": 2010,\n  \"duration\": 148,\n  \"rating\": 8.8\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/media",
+              "host": ["{{gateway_url}}"],
+              "path": ["media"]
+            }
+          }
+        },
+        {
+          "name": "Get All Media (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media?page=0&size=10",
+              "host": ["{{gateway_url}}"],
+              "path": ["media"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Media By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Media",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Breaking Bad (Updated)\",\n  \"description\": \"Updated description\",\n  \"genre\": \"Crime\",\n  \"category\": \"SERIES\",\n  \"releaseYear\": 2008,\n  \"duration\": 47,\n  \"rating\": 9.5\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/media/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "1"]
+            }
+          }
+        },
+        {
+          "name": "Search By Title",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/search?title=breaking",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "search"],
+              "query": [
+                { "key": "title", "value": "breaking" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter By Genre",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/genre/Crime",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "genre", "Crime"]
+            }
+          }
+        },
+        {
+          "name": "Filter By Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/category/SERIES",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "category", "SERIES"]
+            },
+            "description": "Categories: MOVIE, SERIES, PODCAST"
+          }
+        },
+        {
+          "name": "Advanced Filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/filter?genre=Crime&category=SERIES&year=2008&rating=9.0",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "filter"],
+              "query": [
+                { "key": "genre", "value": "Crime" },
+                { "key": "category", "value": "SERIES" },
+                { "key": "year", "value": "2008" },
+                { "key": "rating", "value": "9.0" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Media Exists (Inter-service)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/media/1/exists",
+              "host": ["{{gateway_url}}"],
+              "path": ["media", "1", "exists"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Subscriptions",
+      "item": [
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"plan\": \"PREMIUM\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions"]
+            },
+            "description": "Plans: BASIC, STANDARD, PREMIUM"
+          }
+        },
+        {
+          "name": "Get All Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Subscriptions By User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/user/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "user", "1"]
+            }
+          }
+        },
+        {
+          "name": "Check Subscription Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/user/1/status",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "user", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/1/cancel",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "1", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Renew Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/1/renew",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "1", "renew"]
+            }
+          }
+        },
+        {
+          "name": "Delete Subscription",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/1",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "1"]
+            }
+          }
+        },
+        {
+          "name": "Has Active Subscription (Inter-service)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/user/1/active",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "user", "1", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get User Info via WebClient (Reactive)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/user/1/info-reactive",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "user", "1", "info-reactive"]
+            },
+            "description": "Uses WebClient (reactive) to call user-service"
+          }
+        },
+        {
+          "name": "Check User Exists via WebClient (Reactive)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/subscriptions/user/1/exists-reactive",
+              "host": ["{{gateway_url}}"],
+              "path": ["subscriptions", "user", "1", "exists-reactive"]
+            },
+            "description": "Uses WebClient (reactive) to call user-service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏥 Health Checks",
+      "item": [
+        {
+          "name": "Eureka Server",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8761",
+              "host": ["http://localhost:8761"]
+            }
+          }
+        },
+        {
+          "name": "Config Server Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8888/actuator/health",
+              "host": ["http://localhost:8888"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Gateway Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:7001/actuator/health",
+              "host": ["http://localhost:7001"],
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
