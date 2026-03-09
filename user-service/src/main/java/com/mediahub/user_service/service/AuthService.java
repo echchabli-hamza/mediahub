@@ -66,4 +66,21 @@ public class AuthService {
                 .map(user -> new UserDTO(user.getId(), user.getUsername(), user.getRole()))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Check if user exists by ID
+     */
+    public boolean userExists(Long id) {
+        return userRepository.existsById(id);
+    }
+
+    /**
+     * Get user info by ID (for inter-service communication)
+     */
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found with id: " + id));
+        return new UserDTO(user.getId(), user.getUsername(), user.getRole());
+    }
 }
