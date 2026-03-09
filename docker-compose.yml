@@ -48,6 +48,21 @@ services:
     networks:
       - microservices-net
 
+  # ---- PostgreSQL (Subscription Service) ----
+  postgres-subscription:
+    image: postgres:16-alpine
+    container_name: postgres-subscription
+    environment:
+      POSTGRES_DB: subscriptiondb
+      POSTGRES_USER: user1
+      POSTGRES_PASSWORD: "1111"
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-subscription-data:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
   # ---- User Service (hot reload) ----
   user-service:
     image: eclipse-temurin:21-jdk
@@ -107,6 +122,30 @@ services:
     networks:
       - microservices-net
 
+  # ---- Subscription Service (hot reload) ----
+  subscription-service:
+    image: eclipse-temurin:21-jdk
+    container_name: subscription-service
+    working_dir: /app
+    entrypoint: ["bash", "./entrypoint-dev.sh"]
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./subscription-service:/app
+      - subscription-service-m2:/root/.m2
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://media:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://configserver:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-subscription:5432/subscriptiondb
+      SPRING_DATASOURCE_USERNAME: user1
+      SPRING_DATASOURCE_PASSWORD: "1111"
+    depends_on:
+      - postgres-subscription
+      - media
+      - user-service
+    networks:
+      - microservices-net
+
 networks:
   microservices-net:
     driver: bridge
@@ -114,6 +153,8 @@ networks:
 volumes:
   postgres-data:
   postgres-media-data:
+  postgres-subscription-data:
   user-service-m2:
   media-service-m2:
   gateaway-m2:
+  subscription-service-m2:
