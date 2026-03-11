@@ -53,7 +53,7 @@ public class MediaController {
         return ResponseEntity.noContent().build();
     }
 
-    // ---- Public query endpoints ----
+    // Public  endpoints 
 
     @GetMapping("/genre/{genre}")
     public List<MediaResponse> findByGenre(@PathVariable String genre) {
@@ -78,7 +78,7 @@ public class MediaController {
         return mediaService.filter(genre, category, year, rating);
     }
 
-    // ---- Inter-service endpoints ----
+    //  Inter-service endpoints
 
     @GetMapping("/{id}/exists")
     public Map<String, Boolean> exists(@PathVariable Long id) {
